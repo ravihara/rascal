@@ -4,9 +4,20 @@ var _ = require('lodash').runInContext().mixin({ 'defaultsDeep': require('merge-
 var defaultConfig = require('./lib/config/defaults')
 var testConfig = require('./lib/config/tests')
 var Broker = require('./lib/amqp/Broker')
+var Publication = require('./lib/amqp/Publication')
+var SubscriberSession = require('./lib/amqp/SubscriberSession')
+var Subscription = require('./lib/amqp/Subscription')
+var Vhost = require('./lib/amqp/Vhost')
 
 module.exports = (function() {
     return {
+        classes: {
+            Broker: Broker,
+            Publication: Publication,
+            SubscriberSession: SubscriberSession,
+            Subscription: Subscription,
+            Vhost: Vhost
+        },
         Broker: Broker,
         createBroker: Broker.create,
         defaultConfig: defaultConfig,
