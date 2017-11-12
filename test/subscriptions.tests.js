@@ -277,7 +277,37 @@ describe('Subscriptions', function() {
         })
     })
 
-    it('should consume to invalid messages when no listener is bound', function(done) {
+    it('should not consume messages before a message handler is added', function(done) {
+
+        createBroker({
+            vhosts: vhosts,
+            publications: publications,
+            subscriptions: subscriptions
+        }, function(err, broker) {
+            assert.ifError(err)
+            broker.publish('p1', 'test message', {
+                options: {
+                    contentType: 'text/csv'
+                }
+            }, function(err) {
+                assert.ifError(err)
+                broker.subscribe('s1', function(err, subscription) {
+                    assert.ifError(err)
+                    setTimeout(function() {
+                        subscription.on('message', function(message, content, ackOrNack) {
+                            assert(message)
+                            assert.equal(message.properties.contentType, 'text/csv')
+                            assert.equal(content, 'test message')
+                            done()
+                        })
+                    }, 500)
+                })
+            })
+        })
+    })
+
+
+    it('should consume invalid messages when no invalid_content listener is bound', function(done) {
         createBroker({
             vhosts: vhosts,
             publications: publications,
@@ -288,7 +318,9 @@ describe('Subscriptions', function() {
                 assert.ifError(err)
                 broker.subscribe('s1', function(err, subscription) {
                     assert.ifError(err)
-                    subscription.on('error', function() {
+                    subscription.on('message', function() {
+                        assert(false, 'No message should have been received')
+                    }).on('error', function() {
                         broker.shutdown(function(err) {
                             assert.ifError(err)
                             amqputils.assertMessageAbsent('q1', namespace, done)
@@ -310,7 +342,9 @@ describe('Subscriptions', function() {
                 assert.ifError(err)
                 broker.subscribe('s1', function(err, subscription) {
                     assert.ifError(err)
-                    subscription.on('invalid_content', function(err, message, ackOrNack) {
+                    subscription.on('message', function() {
+                        assert(false, 'No message should have been received')
+                    }).on('invalid_content', function(err, message, ackOrNack) {
                         assert(err)
                         broker.shutdown(function(err) {
                             assert.ifError(err)
@@ -333,7 +367,9 @@ describe('Subscriptions', function() {
                 assert.ifError(err)
                 broker.subscribe('s1', function(err, subscription) {
                     assert.ifError(err)
-                    subscription.on('invalid_message', function(err, message, ackOrNack) {
+                    subscription.on('message', function() {
+                        assert(false, 'No message should have been received')
+                    }).on('invalid_message', function(err, message, ackOrNack) {
                         assert(err)
                         broker.shutdown(function(err) {
                             assert.ifError(err)
@@ -356,7 +392,9 @@ describe('Subscriptions', function() {
                 assert.ifError(err)
                 broker.subscribe('s1', function(err, subscription) {
                     assert.ifError(err)
-                    subscription.on('invalid_content', function(err, message, ackOrNack) {
+                    subscription.on('message', function() {
+                        assert(false, 'No message should have been received')
+                    }).on('invalid_content', function(err, message, ackOrNack) {
                         assert(err)
                         ackOrNack(function() {
                             setTimeout(function() {
@@ -383,7 +421,9 @@ describe('Subscriptions', function() {
                 assert.ifError(err)
                 broker.subscribe('s1', function(err, subscription) {
                     assert.ifError(err)
-                    subscription.on('invalid_content', function(err, message, ackOrNack) {
+                    subscription.on('message', function() {
+                        assert(false, 'No message should have been received')
+                    }).on('invalid_content', function(err, message, ackOrNack) {
                         assert(err)
                         ackOrNack(err, function() {
                             setTimeout(function() {
@@ -1611,15 +1651,16 @@ describe('Subscriptions', function() {
 
                 subscription.on('message', function(message, content, ackOrNack) {
                     assert.ok(false, 'Should not receive messages after unsubscribing')
-                })
-
-                subscription.cancel(function(err) {
-                    assert.ifError(err)
-                    broker.publish('p1', 'test message', function(err) {
+                }).on('ready', function() {
+                    subscription.cancel(function(err) {
                         assert.ifError(err)
-                        setTimeout(done, 500)
+                        broker.publish('p1', 'test message', function(err) {
+                            assert.ifError(err)
+                            setTimeout(done, 500)
+                        })
                     })
                 })
+
             })
         })
     })

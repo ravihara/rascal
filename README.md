@@ -528,12 +528,12 @@ broker.subscribe('s1', function(err, subscription) {
     // Do stuff with message
   }).on('error', function(err) {
     console.error('Subscriber error', err)
-  })
+  }).on('ready', next)
 })
 ```
 It's **very** important that you handle errors emitted by the subscriber. If not an underlying channel error will bubble up to the uncaught error handler and crash your node process.
 
-It's also **very** important not to go async between getting the subscription and listening for the message or error events. If you do, you risk leaking messages and not handling errors.
+Prior to Rascal 3.0.0 It was also **very** important not to go async between getting the subscription and listening for the message or error events. If you did, you risked leaking messages and not handling errors. From Rascal 3.0.0 onwards we only consume messages from the broker after a message handler has been registered, however if you do anything with the subscription or broker after registering the message handler you should wait for subscription 'ready' event to avoid potential race conditions.
 
 Rascal supports text, buffers and anything it can JSON.parse, providing the contentType message property is set correctly. Text messages should be set to "text/plain" and JSON messages to "application/json". Other content types will be returned as a Buffer. If the publisher doesn't set the contentType or you want to override it you can do so in the subscriber configuration.
 ```json
@@ -566,7 +566,7 @@ broker.subscribe('s1', function(err, subscription) {
   }).on('invalid_content', function(err, message, ackOrNack)) {
     console.error('Invalid content', err)
     ackOrNack(err)
-  })
+  }).on('ready', next)
 })
 ```
 If the message has not been auto-acknowledged you should ackOrNack it. **If you do not listen for the invalid_content event rascal will nack the message (without requeue) and emit an error event instead, leading to message loss if you have not configured a dead letter exchange/queue**.
@@ -604,7 +604,7 @@ broker.subscribe('s1', function(err, subscription) {
   }).on('redeliveries_exceeded', function(err, message, ackOrNack)) {
     console.error('Redeliveries Exceeded', err)
     ackOrNack(err)
-  })
+  }).on('ready', next)
 })
 ```
 If you do not listen for the redeliveries_exceeded event rascal will nack the message without requeue **leading to message loss if you have not configured a dead letter exchange/queue**.
@@ -801,17 +801,20 @@ Configuring each vhost, exchange, queue, binding, publication and subscription e
 ```
 
 ### Cancelling subscriptions
-
 You can cancel subscriptions as follows
 
 ```js
 broker.subscribe('s1', function(err, subscription) {
-
-  subscription.cancel(function(err) {
-    console.err(err)
+  subscription
+    .on('message', handler)
+    .on('ready', function() {
+      subscription.cancel(function(err) {
+        console.error(err)
+      })
   })
 })
 ```
+
 ## Bonus Features
 
 ### Shorthand Notation
