@@ -17,6 +17,11 @@
 ### Fixed
 - Randomising vhost connections on startup rather than on each connection request
 
+## [3.0.0]
+### Updated
+- Subscriptions only start consuming when an on message listener is added. This makes it safe to promisify Rascal.
+- Added the subscription 'ready' event, which should be used to avoid certain race conditions
+
 ## [2.8.0]
 ### Fixed
 - Workaround for non deterministic amqplib connection handling, see https://github.com/squaremo/amqp.node/issues/388
