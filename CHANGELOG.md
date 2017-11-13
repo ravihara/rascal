@@ -5,6 +5,18 @@
 - Subscriptions only start consuming when an on message listener is added. This makes it safe to promisify Rascal.
 - Added the subscription 'ready' event, which should be used to avoid certain race conditions
 
+## [2.11.0]
+### Fixed
+- Support for queue and exchange names containeing period and hyphens
+
+## [2.10.0]
+### Fixed
+- Workaround for non deterministic amqplib channel handling, see https://github.com/squaremo/amqp.node/issues/388
+
+## [2.9.0]
+### Fixed
+- Randomising vhost connections on startup rather than on each connection request
+
 ## [2.8.0]
 ### Fixed
 - Workaround for non deterministic amqplib connection handling, see https://github.com/squaremo/amqp.node/issues/388
