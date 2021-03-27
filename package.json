@@ -1,6 +1,6 @@
 {
   "name": "rascal",
-  "version": "10.2.1",
+  "version": "13.0.0",
   "description": "A config driven wrapper for amqplib supporting multi-host connections, automatic error recovery, redelivery flood protection, transparent encryption / decryption,  channel pooling and publication timeouts",
   "main": "index.js",
   "dependencies": {
@@ -9,46 +9,37 @@
     "deep-freeze": "0.0.1",
     "forward-emitter": "^0.1.1",
     "generic-pool": "^3.7.1",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "lru-cache": "^6.0.0",
     "safe-json-parse": "^4.0.0",
-    "stashback": "^1.1.3",
-    "superagent": "^5.3.1",
-    "uuid": "^8.3.0",
-    "xregexp": "^4.3.0"
+    "stashback": "^1.1.2",
+    "superagent": "^6.1.0",
+    "uuid": "^8.3.2",
+    "xregexp": "^5.0.1"
   },
   "devDependencies": {
-    "amqplib": "^0.6.0",
-    "chalk": "^4.1.0",
-    "chance": "^1.1.6",
-    "eslint": "^7.6.0",
-    "eslint-config-imperative": "^3.0.0",
-    "eslint-plugin-imperative": "^3.0.0",
-    "husky": "^4.2.5",
-    "mocha": "^8.1.1",
+    "amqplib": "^0.7.1",
+    "chalk": "^4.0.0",
+    "chance": "^1.1.4",
+    "eslint": "^6.8.0",
+    "eslint-config-esnext": "^4.1.0",
+    "husky": "^5.1.3",
     "nyc": "^15.1.0",
     "random-readable": "^1.0.1",
-    "snyk": "^1.370.0"
+    "zunit": "^3.0.0"
   },
   "peerDependencies": {
     "amqplib": ">=0.6.0"
   },
-  "greenkeeper": {
-    "ignore": [
-      "generic-pool"
-    ]
-  },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.0.0"
   },
   "scripts": {
-    "test": "nyc --reporter text-summary mocha ./test",
+    "test": "node test",
     "lint": "eslint .",
+    "coverage": "nyc --report html --reporter lcov --reporter text-summary node test",
     "docker": "docker run -d --name rascal-rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management",
-    "coverage": "nyc report --reporter lcov --reporter html",
-    "codeclimate": "(test -e .codeclimate && npm run coverage && source .codeclimate && codeclimate-test-reporter < coverage/lcov.info) || echo skipping codeclimate",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "prepare": "husky install"
   },
   "keywords": [
     "amqplib",
@@ -68,19 +59,5 @@
   },
   "homepage": "https://guidesmiths.github.io/rascal/",
   "author": "Stephen Cresswell",
-  "license": "ISC",
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint && npm run test",
-      "pre-push": "npm run codeclimate"
-    }
-  },
-  "mocha": {
-    "check-leaks": true,
-    "recursive": true,
-    "slow": 2000,
-    "timeout": 5000,
-    "exit": true
-  },
-  "snyk": true
+  "license": "ISC"
 }

@@ -3,10 +3,10 @@ Rascal is a rich pub/sub wrapper around [amqplib](https://www.npmjs.com/package/
 
 [![NPM version](https://img.shields.io/npm/v/rascal.svg?style=flat-square)](https://www.npmjs.com/package/rascal)
 [![NPM downloads](https://img.shields.io/npm/dm/rascal.svg?style=flat-square)](https://www.npmjs.com/package/rascal)
-[![Build Status](https://img.shields.io/travis/guidesmiths/rascal/master.svg)](https://travis-ci.org/guidesmiths/rascal)
+[![Node.js CI](https://github.com/guidesmiths/rascal/workflows/Node.js%20CI/badge.svg)](https://github.com/guidesmiths/rascal/actions?query=workflow%3A%22Node.js+CI%22)
 [![Code Climate](https://codeclimate.com/github/guidesmiths/rascal/badges/gpa.svg)](https://codeclimate.com/github/guidesmiths/rascal)
 [![Test Coverage](https://codeclimate.com/github/guidesmiths/rascal/badges/coverage.svg)](https://codeclimate.com/github/guidesmiths/rascal/coverage)
-[![Code Style](https://img.shields.io/badge/code%20style-imperative-brightgreen.svg)](https://github.com/guidesmiths/eslint-config-imperative)
+[![Code Style](https://img.shields.io/badge/code%20style-esnext-brightgreen.svg)](https://www.npmjs.com/package/eslint-config-esnext)
 [![Dependency Status](https://david-dm.org/guidesmiths/rascal.svg)](https://david-dm.org/guidesmiths/rascal)
 [![devDependencies Status](https://david-dm.org/guidesmiths/rascal/dev-status.svg)](https://david-dm.org/guidesmiths/rascal?type=dev)
 
@@ -489,6 +489,7 @@ Rascal useds pools channels it uses for publishing messages. It creates two pool
   }
 }
 ```
+Unfortunately there is a [bug](https://github.com/coopernurse/node-pool/issues/197#issuecomment-477862861) in generic-pool's implementation, which means that if the pool fails to create a channel, it can enter a tight loop, thrashing your CPU and potentially crashing your node process due to a memory leak. While we assess the long term use of pooling, we have put in a workaround. Errors will only be rejected after a configurable delay. This defaults to one second but can be overriden through the `rejectionDelayMillis` pool attribute. Special thanks to @willthrom for helping diagnose and fix this issue.
 
 #### Flow Control
 [amqplib flow control](https://www.squaremobius.net/amqp.node/channel_api.html#flowcontrol) dictates channels act like stream.Writable when Rascal calls `channel.publish` or `channel.sendToQueue`, returning false when the channel is saturated and true if it is not. While it is possible to ignore this and keep publishing messages, it is preferable to apply back pressure to the message source. You can do this by listening to the broker `busy` and `ready` events. Busy events are emitted when the number of outstanding channel requests reach the pool max size, and ready events emitted when the outstanding channel requests falls back down to zero. The pool details are passed to both event handlers so you can take selective action.
@@ -759,7 +760,9 @@ If you prefer to send messages to a queue
 }
 ```
 
-Rascal supports text, buffers and anything it can JSON.stringify. The ```broker.publish``` method is overloaded to accept a runtime routing key or options.
+Rascal supports text, buffers and anything it can JSON.stringify. Rascal will automatically set the content type to `text/plain` for strings, `application/json` for objects and `application/octet-stream` when [encrypting messages](#encrypting-messages). Alternatively you can explicitly set the content type through the `contentType` option.
+
+The ```broker.publish``` method is overloaded to accept a runtime routing key or options.
 
 ```js
 broker.publish("p1", "some message", callback)
@@ -1251,7 +1254,7 @@ ackOrNack(err, { strategy: 'republish', immediateNack: true })
 If you ever want to resend the message to the same queue you will have to remove the ```properties.headers.rascal.<queue>.immediateNack``` header first.
 
 ##### Forward
-Instead of republishing the message to the same queue you can forward it to a Rascal publication. You should read the section entitled [Forwarding messages](Forwarding_messages) to understand the risks of this.
+Instead of republishing the message to the same queue you can forward it to a Rascal publication. You should read the section entitled [Forwarding messages](#Forwarding-messages) to understand the risks of this.
 ```js
 ackOrNack(err, { strategy: 'forward', publication: 'some_exchange'})
 ```

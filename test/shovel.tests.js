@@ -1,24 +1,22 @@
-var assert = require('assert');
-var _ = require('lodash');
-var testConfig = require('../lib/config/tests');
-var uuid = require('uuid').v4;
-var Broker = require('..').Broker;
+const assert = require('assert');
+const _ = require('lodash');
+const testConfig = require('../lib/config/tests');
+const uuid = require('uuid').v4;
+const Broker = require('..').Broker;
 
-describe('Shovel', function() {
+describe('Shovel', () => {
 
-  this.slow(undefined);
+  let broker;
+  let namespace;
+  let config;
 
-  var broker;
-  var namespace;
-  var config;
-
-  beforeEach(function(done) {
+  beforeEach((test, done) => {
 
     namespace = uuid();
     config = {
       vhosts: {
         '/': {
-          namespace: namespace,
+          namespace,
           exchanges: {
             e1: {
               assert: true,
@@ -80,18 +78,18 @@ describe('Shovel', function() {
     done();
   });
 
-  afterEach(function(done) {
+  afterEach((test, done) => {
     if (!broker) return done();
     broker.nuke(done);
   });
 
-  it('should transfer message from subscriber to publication', function(done) {
-    createBroker(config, function(err, broker) {
+  it('should transfer message from subscriber to publication', (test, done) => {
+    createBroker(config, (err, broker) => {
       assert.ifError(err);
       broker.publish('p1', 'Test Message', assert.ifError);
-      broker.subscribe('s2', function(err, subscription) {
+      broker.subscribe('s2', (err, subscription) => {
         assert.ifError(err);
-        subscription.on('message', function(message, content) {
+        subscription.on('message', () => {
           done();
         });
       });
@@ -100,7 +98,7 @@ describe('Shovel', function() {
 
   function createBroker(config, next) {
     config = _.defaultsDeep(config, testConfig);
-    Broker.create(config, function(err, _broker) {
+    Broker.create(config, (err, _broker) => {
       broker = _broker;
       next(err, broker);
     });

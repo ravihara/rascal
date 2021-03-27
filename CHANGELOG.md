@@ -1,5 +1,62 @@
 # Change Log
 
+## 13.0.0
+- Switched to eslint-config-esnext and updated style
+- Update production dependencies
+- Fix vhost management cluster support
+
+## 12.0.4
+- Bump dev dependencies
+- Upgraded to husky 5
+
+## 12.0.3
+- Fix https://github.com/guidesmiths/rascal/issues/141
+- Fix error message typos
+- Bump lodash
+
+## 12.0.2
+- Exclude various files (including the 12M cc-test-reporter binary) from the npm package.
+
+## 12.0.1
+- Moved from travis to github actions
+- Fix broker waiting indefinitely when shutdown is called after losing a connection. See [#126](https://github.com/guidesmiths/rascal/issues/126)
+
+## 12.0.0
+- Removed node 8 support
+
+## 11.0.1
+- Replaced mocha with zunit
+
+## 11.0.0
+- Reworked tests to remove mocha --exit flag
+- Exposed partially initialied brokerAsPromised on the rejected error via a symbol
+- clear keep active interval on broker nuke
+- Updated engine >= 8.0.0
+
+## 10.2.6
+### Updated
+- Dependencies
+- Removing Synk
+
+## 10.2.5
+### Updated
+- Improved readme as per issue [#111](https://github.com/guidesmiths/rascal/issues/111)
+
+### Fixed
+- Fixed issue [#123](https://github.com/guidesmiths/rascal/issues/123), where a race condition was causing channels to be closed twice. Thanks @cinnq346.
+
+## 10.2.4
+### Fixed
+- Fixed issue [#122](https://github.com/guidesmiths/rascal/issues/122), where error listeners were registered once, so repeated errors could bubble up and crash node
+
+## 10.2.3
+### Fixed
+- Fixed second part of issue [#121](https://github.com/guidesmiths/rascal/issues/121), where the generic-pool could cause tight loops and memory leaks
+
+## 10.2.2
+### Fixed
+- Fixed issue [#121](https://github.com/guidesmiths/rascal/issues/121), which caused rascals connection index to permanently increment rather than cycling back to 0. Consequently if all nodes in a cluster failed, Rascal could crash the application.
+
 ## 10.2.1
 ### Updated
 - Support amqplib 0.6.0
@@ -56,7 +113,7 @@
 
 ## 9.1.1
 ### Added
-- Expose clonsed subscription config on session
+- Expose cloned subscription config on session
 
 ## 9.1.0
 ### Added

@@ -1,42 +1,42 @@
-var assert = require('assert');
-var async = require('async');
-var inMemory = require('../../lib/counters/inMemory');
+const assert = require('assert');
+const async = require('async');
+const inMemory = require('../../lib/counters/inMemory');
 
-describe('In Memory Counter', function() {
+describe('In Memory Counter', () => {
 
-  var counter;
+  let counter;
 
-  beforeEach(function() {
+  beforeEach(() => {
     counter = inMemory({ size: 3 });
   });
 
-  it('should return increment and get entries', function(done) {
-    var results = {};
-    async.eachSeries(['one', 'two', 'one'], function(key, cb) {
-      counter.incrementAndGet(key, function(err, value) {
+  it('should return increment and get entries', (test, done) => {
+    const results = {};
+    async.eachSeries(['one', 'two', 'one'], (key, cb) => {
+      counter.incrementAndGet(key, (err, value) => {
         if (err) return cb(err);
         results[key] = value;
         cb();
       });
-    }, function(err) {
+    }, (err) => {
       assert.ifError(err);
-      assert.equal(results.one, 2);
-      assert.equal(results.two, 1);
+      assert.strictEqual(results.one, 2);
+      assert.strictEqual(results.two, 1);
       done();
     });
   });
 
-  it('should limit the counter size', function(done) {
-    var results = {};
-    async.eachSeries(['one', 'two', 'three', 'four', 'one'], function(key, cb) {
-      counter.incrementAndGet(key, function(err, value) {
+  it('should limit the counter size', (test, done) => {
+    const results = {};
+    async.eachSeries(['one', 'two', 'three', 'four', 'one'], (key, cb) => {
+      counter.incrementAndGet(key, (err, value) => {
         if (err) return cb(err);
         results[key] = value;
         cb();
       });
-    }, function(err) {
+    }, (err) => {
       assert.ifError(err);
-      assert.equal(results.one, 1);
+      assert.strictEqual(results.one, 1);
       done();
     });
   });
